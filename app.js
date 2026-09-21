@@ -281,28 +281,33 @@ async function submitForm(){
 
   btn.disabled=true; btn.textContent='Отправляем…'; showStatus('Отправляем анкету в WOW SCHOOL…','neutral');
   try{
-    const payload={
-      access_key: WEB3FORMS_KEY,
-      subject: `Новая анкета преподавателя WOW SCHOOL — ${state.data.firstName||''} ${state.data.lastName||''}`.trim(),
-      from_name: 'WOW SCHOOL — Анкета преподавателя',
-      name: `${state.data.firstName||''} ${state.data.lastName||''}`.trim(),
-      email: state.data.email || '',
-      phone: state.data.phone || '',
-      telegram: state.data.telegram || '',
-      message: text,
-      botcheck: ''
-    };
+    // Передаём данные в Web3Forms тем же набором полей, что и в их базовом HTML-примере.
+    // Honeypot botcheck здесь намеренно не отправляем: он не нужен для этой формы.
+    const formData=new FormData();
+    formData.append('access_key', WEB3FORMS_KEY);
+    formData.append('name', `${state.data.firstName||''} ${state.data.lastName||''}`.trim());
+    formData.append('email', state.data.email || '');
+    formData.append('message', text);
+    formData.append('phone', state.data.phone || '');
+    formData.append('telegram', state.data.telegram || '');
+    formData.append('subject', `Новая анкета преподавателя WOW SCHOOL — ${state.data.firstName||''} ${state.data.lastName||''}`.trim());
+    formData.append('from_name', 'WOW SCHOOL — Анкета преподавателя');
+
     const response=await fetch('https://api.web3forms.com/submit',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify(payload)
+      body:formData
     });
-    const result=await response.json();
-    if(!response.ok || !result.success) throw new Error(result.message || 'Ошибка отправки');
+
+    let result={};
+    try{ result=await response.json(); }catch(e){}
+    if(!response.ok || result.success!==true){
+      throw new Error(result.message || result?.body?.message || `Ошибка Web3Forms (${response.status})`);
+    }
+
     state.sent=true; save(); state.screen=10; render();
   }catch(err){
-    console.error(err);
-    showStatus('Не удалось отправить анкету автоматически. Нажмите ещё раз или скачайте TXT — введённые данные сохранены.', 'bad');
+    console.error('Web3Forms submit error:', err);
+    showStatus(`Не удалось отправить анкету через Web3Forms${err?.message?`: ${err.message}`:''}. Данные сохранены — можно повторить отправку.`, 'bad');
     btn.disabled=false; btn.textContent='Отправить анкету →';
   }
 }
