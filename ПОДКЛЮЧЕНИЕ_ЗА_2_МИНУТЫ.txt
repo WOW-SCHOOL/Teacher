@@ -1,0 +1,12 @@
+WOW SCHOOL — автоматическая отправка без Google Apps Script
+
+1. Откройте: https://web3forms.com/
+2. Укажите почту: wow.school.english@gmail.com
+3. Подтвердите её и скопируйте Access Key.
+4. Откройте файл config.js.
+5. Найдите строку:
+   window.WOW_WEB3FORMS_ACCESS_KEY = "";
+6. Вставьте ключ между кавычками.
+7. Загрузите файлы на GitHub Pages с заменой старой версии.
+
+После этого преподаватель нажимает «Отправить анкету», и вся анкета приходит на wow.school.english@gmail.com автоматически.

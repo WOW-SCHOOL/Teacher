@@ -1,5 +1,5 @@
 const app = document.getElementById('app');
-const ENDPOINT = window.WOW_TEACHER_FORM_ENDPOINT || '';
+const WEB3FORMS_KEY = window.WOW_WEB3FORMS_ACCESS_KEY || '';
 const DESTINATION_EMAIL = window.WOW_TEACHER_FORM_EMAIL || 'wow.school.english@gmail.com';
 const STORAGE_KEY = 'wow_teacher_profile_form_v2';
 
@@ -176,8 +176,8 @@ function sendInfo(){
   app.innerHTML=shell(`<div class="slide"><div class="content">${kicker(8,'Отправка анкеты')}<h1>Остался <span>один шаг</span></h1><p class="lead">После заполнения ничего вручную собирать не нужно. На следующем экране проверьте ответы и нажмите «Отправить анкету».</p>
     <div class="sendSteps">
       <div class="sendStep"><span>1</span><div><b>Проверьте данные</b><p>Имя, контакты, опыт, направления, экзамены и сильные стороны.</p></div></div>
-      <div class="sendStep"><span>2</span><div><b>Отправьте одной кнопкой</b><p>Система сформирует аккуратную PDF-анкету преподавателя.</p></div></div>
-      <div class="sendStep"><span>3</span><div><b>Готово</b><p>PDF уйдёт в WOW SCHOOL на <strong>${esc(DESTINATION_EMAIL)}</strong> и сохранится в нашей папке Google Drive.</p></div></div>
+      <div class="sendStep"><span>2</span><div><b>Отправьте одной кнопкой</b><p>${ENDPOINT?'Система передаст ответы и сформирует PDF-анкету.':'Откроется готовое письмо на адрес WOW SCHOOL, а копия анкеты сохранится на устройство.'}</p></div></div>
+      <div class="sendStep"><span>3</span><div><b>Готово</b><p>${ENDPOINT?`PDF уйдёт в WOW SCHOOL на <strong>${esc(DESTINATION_EMAIL)}</strong> и сохранится в нашей папке Google Drive.`:`Проверьте готовое письмо и нажмите «Отправить». Получатель уже указан: <strong>${esc(DESTINATION_EMAIL)}</strong>.`}</p></div></div>
     </div>
     <div class="recipientCard"><div class="recipientIcon">✉️</div><div><small>Получатель</small><strong>${esc(DESTINATION_EMAIL)}</strong><span>После успешной отправки на экране появится подтверждение.</span></div></div>
     ${tip('<b>Фото и видеовизитка.</b> Если вы уже отправляли их менеджеру — повторно ничего делать не нужно. Если ещё нет, отправьте их отдельно после анкеты.')}
@@ -241,14 +241,14 @@ function summary(){
 }
 function review(){
   const d=state.data; const sum=summary();
-  app.innerHTML=shell(`<div class="slide noVisual"><div class="content">${kicker(9,'Проверка и отправка')}<h1>Проверьте <span>анкету</span></h1><p class="lead">После нажатия кнопки система сформирует PDF, отправит его в WOW SCHOOL на <b>${esc(DESTINATION_EMAIL)}</b> и сохранит копию в Google Drive.</p>
+  app.innerHTML=shell(`<div class="slide noVisual"><div class="content">${kicker(9,'Проверка и отправка')}<h1>Проверьте <span>анкету</span></h1><p class="lead">После нажатия кнопки анкета будет автоматически отправлена в WOW SCHOOL на <b>${esc(DESTINATION_EMAIL)}</b>. Дополнительно пересылать ответы не нужно.</p>
     <div class="reviewGrid">
       <div class="reviewCard"><h3>Контакты</h3><div class="reviewRows"><div class="reviewRow"><b>${esc(d.firstName)} ${esc(d.lastName)}</b></div><div class="reviewRow">📞 ${esc(val(d.phone))}</div><div class="reviewRow">✈️ ${esc(val(d.telegram))}</div><div class="reviewRow">✉️ ${esc(val(d.email))}</div></div></div>
       <div class="reviewCard"><h3>Ключевое</h3><div class="reviewRows"><div class="reviewRow">Опыт: <b>${esc(val(d.yearsTeaching))} лет</b></div><div class="reviewRow">Уровни: ${esc(val(d.levels))}</div><div class="reviewRow">Направления: ${esc(val(d.directions))}</div><div class="reviewRow">Экзамены: ${esc(val(d.exams))}</div></div></div>
     </div>
     <div class="sectionLabel">Готовая анкета</div><div class="summaryBox" id="summary">${esc(sum)}</div>
     <label class="consent"><input type="checkbox" id="consent" ${d.consent?'checked':''}><span>Подтверждаю, что указал(а) корректную информацию и разрешаю WOW SCHOOL использовать её для подготовки моей карточки преподавателя и связи со мной.</span></label>
-    <div id="status" class="submitStatus neutral">${ENDPOINT?`Всё готово. PDF будет отправлен на ${esc(DESTINATION_EMAIL)} и сохранён в Google Drive.`:'Сейчас включён демо-режим: сервер отправки ещё не подключён. Анкету можно скачать или скопировать.'}</div>
+    <div id="status" class="submitStatus neutral">${WEB3FORMS_KEY?`Всё готово. После отправки заполненная анкета автоматически придёт на ${esc(DESTINATION_EMAIL)}.`:`Автоматическая отправка ещё не подключена. При нажатии «Отправить анкету» откроется готовое письмо на ${esc(DESTINATION_EMAIL)}, а текстовая копия сохранится на устройство.`}</div>
     <div class="actions"><button class="btn secondary" id="back">← Назад</button><div style="display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end"><button class="btn secondary" id="copy">Копировать</button><button class="btn secondary" id="download">Скачать TXT</button><button class="btn primary" id="send">Отправить анкету →</button></div></div>
   </div></div>`);
   document.getElementById('back').onclick=()=>{state.screen=8;save();render();};
@@ -264,20 +264,50 @@ function downloadText(text){
 }
 async function submitForm(){
   if(!state.data.consent){showStatus('Нужно подтвердить согласие перед отправкой.','bad');return;}
-  if(!ENDPOINT){showStatus('Endpoint не настроен. Скачайте TXT или добавьте URL Google Apps Script в config.js.','bad');return;}
-  const btn=document.getElementById('send'); btn.disabled=true; btn.textContent='Отправляем…'; showStatus('Отправляем анкету…','neutral');
-  const payload={...state.data, summary:summary(), source:'WOW Teacher Profile Form', submittedAt:new Date().toISOString()};
+  const btn=document.getElementById('send');
+  const text=summary();
+
+  // Резервный режим: если Access Key Web3Forms ещё не добавлен,
+  // сохраняем TXT и открываем готовое письмо на почту WOW SCHOOL.
+  if(!WEB3FORMS_KEY){
+    downloadText(text);
+    const subject=`Анкета преподавателя WOW SCHOOL — ${state.data.firstName||''} ${state.data.lastName||''}`.trim();
+    const body=`Здравствуйте!%0A%0AОтправляю заполненную анкету преподавателя WOW SCHOOL.%0A%0A${encodeURIComponent(text)}`;
+    const gmail=`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(DESTINATION_EMAIL)}&su=${encodeURIComponent(subject)}&body=${body}`;
+    window.open(gmail,'_blank','noopener');
+    showStatus('Готовое письмо открыто. Проверьте его и нажмите «Отправить». Копия анкеты также сохранена на устройство.', 'good');
+    return;
+  }
+
+  btn.disabled=true; btn.textContent='Отправляем…'; showStatus('Отправляем анкету в WOW SCHOOL…','neutral');
   try{
-    const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
-    const data=await res.json().catch(()=>({ok:res.ok}));
-    if(!res.ok || data.ok===false) throw new Error(data.error||'Ошибка отправки');
-    state.sent=true; state.pdfUrl=data.fileUrl||''; state.fileName=data.fileName||''; save(); state.screen=10; render();
+    const payload={
+      access_key: WEB3FORMS_KEY,
+      subject: `Новая анкета преподавателя WOW SCHOOL — ${state.data.firstName||''} ${state.data.lastName||''}`.trim(),
+      from_name: 'WOW SCHOOL — Анкета преподавателя',
+      name: `${state.data.firstName||''} ${state.data.lastName||''}`.trim(),
+      email: state.data.email || '',
+      phone: state.data.phone || '',
+      telegram: state.data.telegram || '',
+      message: text,
+      botcheck: ''
+    };
+    const response=await fetch('https://api.web3forms.com/submit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    const result=await response.json();
+    if(!response.ok || !result.success) throw new Error(result.message || 'Ошибка отправки');
+    state.sent=true; save(); state.screen=10; render();
   }catch(err){
-    console.error(err); showStatus('Не удалось отправить автоматически. Анкета сохранена в браузере — можно скачать TXT и отправить вручную.','bad'); btn.disabled=false; btn.textContent='Отправить анкету →';
+    console.error(err);
+    showStatus('Не удалось отправить анкету автоматически. Нажмите ещё раз или скачайте TXT — введённые данные сохранены.', 'bad');
+    btn.disabled=false; btn.textContent='Отправить анкету →';
   }
 }
 function success(){
-  app.innerHTML=shell(`<div class="success"><div><div class="successIcon">✓</div><h1>Анкета <span>отправлена</span></h1><p>Спасибо! Готовая анкета передана WOW SCHOOL на <b>${esc(DESTINATION_EMAIL)}</b> и сохранена в Google Drive. Дополнительно пересылать ответы не нужно.</p><div class="successNote">Если фото или видеовизитку вы ещё не отправляли менеджеру, пришлите их отдельно.</div><div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px"><button class="btn secondary" id="download">Скачать текстовую копию</button><button class="btn primary" id="new">Заполнить заново</button></div></div></div>`);
+  app.innerHTML=shell(`<div class="success"><div><div class="successIcon">✓</div><h1>Анкета <span>отправлена</span></h1><p>Спасибо! Готовая анкета отправлена в WOW SCHOOL на <b>${esc(DESTINATION_EMAIL)}</b>. Дополнительно пересылать ответы не нужно.</p><div class="successNote">Если фото или видеовизитку вы ещё не отправляли менеджеру, пришлите их отдельно.</div><div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px"><button class="btn secondary" id="download">Скачать текстовую копию</button><button class="btn primary" id="new">Заполнить заново</button></div></div></div>`);
   document.getElementById('download').onclick=()=>downloadText(summary());
   document.getElementById('new').onclick=()=>{state={screen:0,data:{...defaultData},sent:false,pdfUrl:'',fileName:''};localStorage.removeItem(STORAGE_KEY);render();};
 }
