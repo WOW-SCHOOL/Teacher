@@ -140,10 +140,10 @@ function experience(){
   app.innerHTML=shell(`<div class="slide"><div class="content">${kicker(3,'Опыт преподавания')}<h1>С кем вы уже <span>работаете</span></h1><p class="lead">Эта часть особенно важна: ученик сразу должен понимать, подходит ли ему ваш опыт и формат.</p>
     <div class="formGrid">${field('Сколько лет преподаёте','yearsTeaching','number',{min:0,required:true})}${field('С какого возраста берёте детей','minChildAge','text',{placeholder:'Например: с 7 лет / не работаю с детьми'})}</div>
     <div class="sectionLabel">С кем работаете</div>${choices('audiences',['Дети','Подростки','Взрослые','Студенты','Старшие ученики 50+'])}
-    <div class="sectionLabel">Форматы</div>${choices('teachingFormats',['Онлайн','Офлайн','Индивидуально','Парно','Группы','Разговорные клубы'])}
+    <div class="sectionLabel">Форматы онлайн</div>${choices('teachingFormats',['Индивидуально','Парно','Разговорные клубы'])}
     <div class="sectionLabel">Уровни учеников</div>${choices('levels',['A0 / с нуля','A1','A2','B1','B2','C1','C2'])}
     <div class="formGrid" style="margin-top:14px">${field('Где преподавали / преподаёте','workplaces','textarea',{full:true,placeholder:'Школы, языковые центры, университет, частная практика — без лишних подробностей'})}${field('Разговорные клубы / интенсивы / спецпроекты','clubs','text',{full:true,placeholder:'Если есть'})}</div>
-    ${actions()}</div>${visual('teacher-form-experience.png','🧩','Опыт','Место под визуал: преподаватель с подростком и взрослым, онлайн и офлайн форматы.')}</div>`);
+    ${actions()}</div>${visual('teacher-form-experience.png','🧩','Опыт','Место под визуал: преподаватель с подростком и взрослым, онлайн-форматы занятий.')}</div>`);
   bindCommon(); goNext(()=>required(['yearsTeaching']));
 }
 
@@ -160,7 +160,7 @@ function style(){
   app.innerHTML=shell(`<div class="slide"><div class="content">${kicker(5,'Как проходят занятия')}<h1>Ваш <span>стиль</span> преподавания</h1><p class="lead">Здесь лучше выбрать реальные привычки и инструменты, а не то, что «хорошо звучит».</p>
     <div class="sectionLabel">На что чаще делаете акцент</div>${choices('focus',['Разговорная практика','Грамматика','Аудирование','Произношение','Словарный запас','Письмо','Чтение','Экзаменационные стратегии'])}
     <div class="sectionLabel">Что используете на занятиях</div>${choices('methods',['Диалоги','Ролевые ситуации','Видео','Аудио / подкасты','Игры','Статьи / новости','Кейсы','Проекты','Карточки / визуал','Обсуждения','Домашние задания'])}
-    <div class="formGrid" style="margin-top:14px">${field('Как объясняете грамматику','grammarStyle','textarea',{placeholder:'Коротко, своими словами'})}${field('Как работаете с ошибками','correctionStyle','textarea',{placeholder:'Например: мягко исправляю в речи / разбираю после задания'})}${field('Что отличает ваши занятия','lessonDifference','textarea',{full:true,placeholder:'1–3 конкретные особенности'})}</div>
+    <div class="formGrid" style="margin-top:14px">${field('Как вы объясняете грамматику ученику?','grammarStyle','textarea',{placeholder:'Например: объясняю на русском или английском; даю простое правило и примеры, затем закрепляем в речи и заданиях'})}${field('Как работаете с ошибками','correctionStyle','textarea',{placeholder:'Например: мягко исправляю в речи / разбираю после задания'})}${field('Что отличает ваши занятия','lessonDifference','textarea',{full:true,placeholder:'1–3 конкретные особенности'})}</div>
     ${actions()}</div>${visual('teacher-form-style.png','💬','Формат занятий','Место под визуал: диалог, видео, карточки, интерактивные задания.')}</div>`);
   bindCommon(); goNext();
 }
@@ -183,15 +183,15 @@ function results(){
 }
 
 function sendInfo(){
-  app.innerHTML=shell(`<div class="slide"><div class="content">${kicker(8,'Отправка анкеты')}<h1>Остался <span>один шаг</span></h1><p class="lead">После заполнения ничего вручную собирать не нужно. На следующем экране проверьте ответы и нажмите «Отправить анкету».</p>
+  app.innerHTML=shell(`<div class="slide"><div class="content">${kicker(8,'Отправка анкеты')}<h1>Остался <span>один шаг</span></h1><p class="lead">На следующем экране внимательно проверьте ответы. Перед отправкой рекомендуем сохранить текстовую копию анкеты на устройство — на всякий случай. Затем нажмите «Отправить анкету».</p>
     <div class="sendSteps">
       <div class="sendStep"><span>1</span><div><b>Проверьте данные</b><p>Имя, контакты, опыт, направления, экзамены и сильные стороны.</p></div></div>
-      <div class="sendStep"><span>2</span><div><b>Отправьте одной кнопкой</b><p>Система автоматически отправит заполненную анкету в WOW SCHOOL.</p></div></div>
-      <div class="sendStep"><span>3</span><div><b>Готово</b><p>Анкета придёт в WOW SCHOOL на <strong>${esc(DESTINATION_EMAIL)}</strong>.</p></div></div>
+      <div class="sendStep"><span>2</span><div><b>Сохраните текстовую копию</b><p>На следующем экране нажмите «Скачать TXT» и сохраните анкету на устройство — на всякий случай.</p></div></div>
+      <div class="sendStep"><span>3</span><div><b>Отправьте анкету</b><p>После проверки нажмите «Отправить анкету». Она придёт в WOW SCHOOL на <strong>${esc(DESTINATION_EMAIL)}</strong>.</p></div></div>
     </div>
     <div class="recipientCard"><div class="recipientIcon">✉️</div><div><small>Получатель</small><strong>${esc(DESTINATION_EMAIL)}</strong><span>После успешной отправки на экране появится подтверждение.</span></div></div>
     ${tip('<b>Фото и видеовизитка.</b> Если вы уже отправляли их менеджеру — повторно ничего делать не нужно. Если ещё нет, отправьте их отдельно после анкеты.')}
-    ${actions({next:'Проверить анкету →'})}</div>${visual('teacher-form-submit.png','📩','Отправка анкеты','Ваши ответы собираются в один структурированный файл и передаются WOW SCHOOL.')}</div>`);
+    ${actions({next:'Проверить анкету →'})}</div>${visual('teacher-form-submit.png','📩','Отправка анкеты','Ваши ответы будут представлены в структурированном виде и отправлены в WOW SCHOOL.')}</div>`);
   bindCommon(); goNext();
 }
 
@@ -221,7 +221,7 @@ function summary(){
     `ОПЫТ: ${val(d.yearsTeaching)} лет`,
     `С кем работает: ${val(d.audiences)}`,
     `Минимальный возраст ребёнка: ${val(d.minChildAge)}`,
-    `Форматы: ${val(d.teachingFormats)}`,
+    `Форматы онлайн: ${val(d.teachingFormats)}`,
     `Уровни: ${val(d.levels)}`,
     `Где преподавал(а): ${val(d.workplaces)}`,
     `Клубы / интенсивы: ${val(d.clubs)}`,
