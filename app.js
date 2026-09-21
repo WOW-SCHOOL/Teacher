@@ -114,7 +114,17 @@ function personal(){
     <div class="sectionLabel">Вы носитель английского?</div>${choices('nativeSpeaker',['Да','Нет'],{radio:true})}
     <div class="formGrid" style="margin-top:14px">${field('Уровень английского','englishLevel','select',{options:['Native Speaker','C2','C1+','C1','B2–C1','B2','Другой']})}${field('Русский язык','russianLevel','select',{options:['Не говорю / почти не понимаю','A1','A2','B1','B2','C1 / свободно']})}${field('Другие языки','otherLanguages','text',{full:true,placeholder:'Если есть'})}</div>
     ${actions()}</div>${visual('teacher-form-personal.png','🌍','Личная информация','Место под фотографию/коллаж: преподаватели из разных стран, современный международный стиль.')}</div>`);
-  bindCommon(); goNext(()=>required(['firstName','lastName','country','phone','email']));
+  bindCommon(); goNext(()=>{
+    if(!required(['firstName','lastName','country','phone','email'])) return false;
+    const emailEl=document.querySelector('[data-field="email"]');
+    if(emailEl && !emailEl.checkValidity()){
+      emailEl.style.borderColor='#e7546c';
+      emailEl.reportValidity();
+      emailEl.focus();
+      return false;
+    }
+    return true;
+  });
 }
 
 function education(){
@@ -279,29 +289,42 @@ async function submitForm(){
     return;
   }
 
+  const email=String(state.data.email||'').trim();
+  const emailProbe=document.createElement('input');
+  emailProbe.type='email'; emailProbe.required=true; emailProbe.value=email;
+  if(!emailProbe.checkValidity()){
+    showStatus('Укажите корректный email перед отправкой анкеты.','bad');
+    return;
+  }
+
   btn.disabled=true; btn.textContent='Отправляем…'; showStatus('Отправляем анкету в WOW SCHOOL…','neutral');
   try{
-    // Передаём данные в Web3Forms тем же набором полей, что и в их базовом HTML-примере.
-    // Honeypot botcheck здесь намеренно не отправляем: он не нужен для этой формы.
-    const formData=new FormData();
-    formData.append('access_key', WEB3FORMS_KEY);
-    formData.append('name', `${state.data.firstName||''} ${state.data.lastName||''}`.trim());
-    formData.append('email', state.data.email || '');
-    formData.append('message', text);
-    formData.append('phone', state.data.phone || '');
-    formData.append('telegram', state.data.telegram || '');
-    formData.append('subject', `Новая анкета преподавателя WOW SCHOOL — ${state.data.firstName||''} ${state.data.lastName||''}`.trim());
-    formData.append('from_name', 'WOW SCHOOL — Анкета преподавателя');
+    // Web3Forms рекомендует JSON для JavaScript-отправки. botcheck передаём корректным boolean.
+    const payload={
+      access_key: WEB3FORMS_KEY,
+      name: `${state.data.firstName||''} ${state.data.lastName||''}`.trim(),
+      email,
+      message: text,
+      phone: state.data.phone || '',
+      telegram: state.data.telegram || '',
+      subject: `Новая анкета преподавателя WOW SCHOOL — ${state.data.firstName||''} ${state.data.lastName||''}`.trim(),
+      from_name: 'WOW SCHOOL — Анкета преподавателя',
+      botcheck: false
+    };
 
     const response=await fetch('https://api.web3forms.com/submit',{
       method:'POST',
-      body:formData
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(payload)
     });
 
     let result={};
     try{ result=await response.json(); }catch(e){}
+    if(response.status===429){
+      throw new Error('Web3Forms временно ограничил слишком частые отправки с одного IP. Подождите около часа и попробуйте снова.');
+    }
     if(!response.ok || result.success!==true){
-      throw new Error(result.message || result?.body?.message || `Ошибка Web3Forms (${response.status})`);
+      throw new Error(result.message || result?.body?.message || result?.error || `Ошибка Web3Forms (${response.status})`);
     }
 
     state.sent=true; save(); state.screen=10; render();
