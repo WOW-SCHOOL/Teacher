@@ -186,8 +186,8 @@ function sendInfo(){
   app.innerHTML=shell(`<div class="slide"><div class="content">${kicker(8,'Отправка анкеты')}<h1>Остался <span>один шаг</span></h1><p class="lead">После заполнения ничего вручную собирать не нужно. На следующем экране проверьте ответы и нажмите «Отправить анкету».</p>
     <div class="sendSteps">
       <div class="sendStep"><span>1</span><div><b>Проверьте данные</b><p>Имя, контакты, опыт, направления, экзамены и сильные стороны.</p></div></div>
-      <div class="sendStep"><span>2</span><div><b>Отправьте одной кнопкой</b><p>${ENDPOINT?'Система передаст ответы и сформирует PDF-анкету.':'Откроется готовое письмо на адрес WOW SCHOOL, а копия анкеты сохранится на устройство.'}</p></div></div>
-      <div class="sendStep"><span>3</span><div><b>Готово</b><p>${ENDPOINT?`PDF уйдёт в WOW SCHOOL на <strong>${esc(DESTINATION_EMAIL)}</strong> и сохранится в нашей папке Google Drive.`:`Проверьте готовое письмо и нажмите «Отправить». Получатель уже указан: <strong>${esc(DESTINATION_EMAIL)}</strong>.`}</p></div></div>
+      <div class="sendStep"><span>2</span><div><b>Отправьте одной кнопкой</b><p>Система автоматически отправит заполненную анкету в WOW SCHOOL.</p></div></div>
+      <div class="sendStep"><span>3</span><div><b>Готово</b><p>Анкета придёт в WOW SCHOOL на <strong>${esc(DESTINATION_EMAIL)}</strong>.</p></div></div>
     </div>
     <div class="recipientCard"><div class="recipientIcon">✉️</div><div><small>Получатель</small><strong>${esc(DESTINATION_EMAIL)}</strong><span>После успешной отправки на экране появится подтверждение.</span></div></div>
     ${tip('<b>Фото и видеовизитка.</b> Если вы уже отправляли их менеджеру — повторно ничего делать не нужно. Если ещё нет, отправьте их отдельно после анкеты.')}
